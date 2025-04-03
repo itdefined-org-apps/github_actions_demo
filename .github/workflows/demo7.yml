@@ -1,0 +1,21 @@
+name: Test Custom Python Action
+
+on: [workflow_dispatch]
+
+jobs:
+  run_python_action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: List directory contents
+        run: |
+          ls -lart .github
+          ls -lart .github/actions
+          ls -lart .github/actions/hello
+
+      - name: Run custom Python action
+        uses: ./.github/actions/hello 
+        with:
+          name: "Sachin Tendulkar"

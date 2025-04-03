@@ -1,0 +1,40 @@
+name: Deploy to EC2
+on:
+    # push:
+    #     branches:
+    #         - main  # Change if needed
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Deploy to EC2
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  script: |
+                      # Ensure Node.js is installed
+                      if ! command -v node &> /dev/null; then
+                          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+                          sudo apt install -y nodejs
+                      fi
+
+                      # Clone or update the repo
+                      if [ ! -d "/home/ubuntu/${{ github.event.repository.name }}" ]; then
+                          git clone https://github.com/${{ github.repository }}.git /home/ubuntu/${{ github.event.repository.name }}
+                      fi
+                      cd /home/ubuntu/${{ github.event.repository.name }}
+                      git pull origin main
+                      npm install
+
+                      # Kill any previous process running on port 3000
+                      fuser -k 3000/tcp || true
+
+                      # Start the application in the background
+                      nohup npm start > output.log 2>&1 &

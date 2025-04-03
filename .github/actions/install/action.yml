@@ -1,0 +1,15 @@
+name: "Install Software Action"
+description: "Installs the specified software using apt"
+
+inputs:
+  software:
+    description: "Software package to install"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        SOFTWARE_NAME: ${{ inputs.software }}
+      run: bash $GITHUB_ACTION_PATH/install.sh

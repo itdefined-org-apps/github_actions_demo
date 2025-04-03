@@ -1,0 +1,14 @@
+name: Test Install Action
+on: [push]
+
+jobs:
+  install_software:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Curl
+        uses: ./.github/actions/install
+        with:
+          software: "curl"

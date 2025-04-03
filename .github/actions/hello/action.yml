@@ -1,0 +1,16 @@
+name: "Shell Hello Action"
+description: "A simple GitHub Action using Bash"
+
+inputs:
+  name:
+    description: "Your name"
+    required: true
+    default: "Developer"
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        INPUT_NAME: ${{ inputs.name }}
+      run: bash $GITHUB_ACTION_PATH/hello.sh

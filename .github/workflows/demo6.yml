@@ -1,0 +1,48 @@
+name: Deploy Dockerized App to EC2
+on:
+    # push:
+    #     branches:
+    #         - main
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Deploy to EC2
+              uses: appleboy/scp-action@v0.1.4  # Copy files to EC2
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  source: "."  # Upload all project files
+                  target: "/home/ubuntu/${{ github.event.repository.name }}"
+
+            - name: Build and Run Docker on EC2
+              uses: appleboy/ssh-action@v0.1.5
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  script: |
+                      # Install Docker if not installed
+                      if ! command -v docker &> /dev/null; then
+                          curl -fsSL https://get.docker.com | sh
+                          sudo usermod -aG docker ubuntu
+                      fi
+
+                      # Navigate to the project directory
+                      cd /home/ubuntu/${{ github.event.repository.name }}
+
+                      # Stop and remove old container (if running)
+                      sudo docker stop my-app || true
+                      sudo docker rm my-app || true
+
+                      # Build the Docker image locally on EC2
+                      sudo docker build -t my-app .
+
+                      # Run the container on EC2
+                      sudo docker run -d --name my-app -p 3005:3000 my-app
