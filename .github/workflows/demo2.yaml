@@ -1,0 +1,11 @@
+name: demo-2
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  clone-my-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ls -lart
