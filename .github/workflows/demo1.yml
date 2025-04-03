@@ -1,6 +1,6 @@
 name: demo1
 
-on: push
+on: workflow_dispatch
 
 jobs:
     This-is-first-Job:
